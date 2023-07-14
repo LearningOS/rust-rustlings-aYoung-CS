@@ -8,6 +8,7 @@
 
 use std::num::ParseIntError;
 use std::str::FromStr;
+use std::ops::BitOr;
 
 #[derive(Debug, PartialEq)]
 struct Person {
@@ -28,7 +29,13 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
+
+impl BitOr for ParsePersonError {
+    type Output = Self;
+    fn bitor(self, rhs: Self) -> Self {
+        self
+    }
+}
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -46,6 +53,42 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        let v: Vec<&str> = s.split(',').collect();
+        match v.len() {
+            1 => {
+                if v[0].to_string().len() == 0{
+                    Err(ParsePersonError::Empty)
+                }
+                else{
+                    Err(ParsePersonError::BadLen)
+                }
+            },
+            2 => {
+                let mut no_name = false;
+                let mut parse_err = false;
+                if v[0].to_string().len()==0 {
+                    no_name = true;
+                }
+                let aage = v[1].to_string().parse::<usize>();
+                if aage.is_err() {
+                    parse_err = true;
+                }
+                if no_name && parse_err{
+                    Err(ParsePersonError::NoName | ParsePersonError::ParseInt(aage.err().unwrap()))
+                }
+                else if no_name {
+                    Err(ParsePersonError::NoName)
+                }
+                else if parse_err {
+                    Err(ParsePersonError::ParseInt(aage.err().unwrap()))
+                }
+                else{
+                    Ok(Person {name: v[0].to_string(), age: aage.unwrap()})
+                }
+
+            },
+            _ => Err(ParsePersonError::BadLen)
+        }
     }
 }
 
