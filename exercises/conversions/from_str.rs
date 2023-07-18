@@ -56,7 +56,7 @@ impl FromStr for Person {
         let v: Vec<&str> = s.split(',').collect();
         match v.len() {
             1 => {
-                if v[0].to_string().len() == 0{
+                if v[0].is_empty() {
                     Err(ParsePersonError::Empty)
                 }
                 else{
@@ -66,7 +66,7 @@ impl FromStr for Person {
             2 => {
                 let mut no_name = false;
                 let mut parse_err = false;
-                if v[0].to_string().len()==0 {
+                if v[0].is_empty() {
                     no_name = true;
                 }
                 let aage = v[1].to_string().parse::<usize>();
